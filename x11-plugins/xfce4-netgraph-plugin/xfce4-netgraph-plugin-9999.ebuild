@@ -4,12 +4,13 @@ inherit autotools git-r3
 
 DESCRIPTION="Network graph plugin for Xfce panel"
 HOMEPAGE="https://github.com/dlzr/xfce4-netgraph-plugin"
-# Use the correct format for git repositories
-SRC_URI="https://github.com/dlzr/xfce4-netgraph-plugin.git"
 
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
+
+# Define the Git repository URI (this will resolve the EGIT_REPO_URI issue)
+EGIT_REPO_URI="https://github.com/dlzr/xfce4-netgraph-plugin.git"
 
 DEPEND="
     x11-libs/gtk+:3
@@ -32,6 +33,9 @@ BDEPEND="
 "
 
 src_prepare() {
+    # Apply user patches (or default patches if any)
+    eapply_user || die "Failed to apply user patches"
+    
     # Auto-generate the necessary build files
     ./autogen.sh || die "Autogen failed"
 }

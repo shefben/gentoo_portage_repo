@@ -1,52 +1,58 @@
+# Copyright 2025
+# Distributed under the terms of the GNU General Public License v2
+
 EAPI=8
 
 inherit autotools git-r3
 
-DESCRIPTION="Network graph plugin for Xfce panel"
-HOMEPAGE="https://github.com/dlzr/xfce4-netgraph-plugin"
-# Use the correct format for git repositories
-SRC_URI="https://github.com/dlzr/xfce4-netgraph-plugin.git"
+DESCRIPTION="XFCE panel plugin to toggle host aliases in /etc/hosts"
+HOMEPAGE="https://github.com/Azmisov/xfce-hosts-plugin"
+EGIT_REPO_URI="https://github.com/Azmisov/xfce-hosts-plugin.git"
 
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="~amd64 ~x86"  # Add architecture keywords here, such as amd64 and x86
+IUSE=""
 
-DEPEND="
+RDEPEND="
     x11-libs/gtk+:3
-    dev-libs/glib:2
-    net-analyzer/ifstat
+    xfce-base/libxfce4util
+    sys-auth/polkit
     xfce-base/libxfce4ui
+"
+DEPEND="${RDEPEND}
+    sys-devel/gcc
+    dev-build/make
     dev-util/intltool
     sys-devel/gettext
-    dev-build/automake
-    dev-build/autoconf
 "
 
-RDEPEND="${DEPEND}"
-
-# Required for building from source using autogen.sh
-BDEPEND="
-    dev-build/automake
-    dev-build/autoconf
-    dev-util/pkgconf
-"
+# This ensures git clones the repository into the correct directory
+src_fetch() {
+    git-r3_src_fetch
+}
 
 src_prepare() {
-    # Auto-generate the necessary build files
-    ./autogen.sh || die "Autogen failed"
+    default
+    eautoreconf
+}
+
+src_configure() {
+    ./autogen.sh
+    default
 }
 
 src_compile() {
-    # Build the plugin
-    emake || die "Make failed"
+    emake
 }
 
 src_install() {
-    # Install the plugin
-    emake DESTDIR="${D}" install || die "Install failed"
+    emake DESTDIR="${D}" install
+    # Restart xfce4-panel after installation
+    elog "To apply changes, restart xfce4-panel: xfce4-panel --restart"
 }
 
 pkg_postinst() {
-    # No post-installation actions required.
-    echo "To enable the plugin, add it to your XFCE panel."
+    elog "The xfce-hosts-plugin has been installed. To use it, restart xfce4-panel."
+    elog "You can add it to your XFCE panel via the 'Add New Items' menu."
 }
